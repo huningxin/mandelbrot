@@ -268,7 +268,40 @@ function asmjsModule (global, imp, buffer) {
 
     ydx4 = toF(yd * toF(4));
     for (y = 0; (y | 0) < (height | 0); y = (y + 4) | 0) {
-      m4   = i4(mandelPixelX4(toF(xf), toF(yf), toF(yd), max_iterations));
+      xf = toF(xf);
+      yf = toF(yf);
+      yd = toF(yd);
+      max_iterations = max_iterations | 0;
+      var c_re4  = f4(0,0,0,0), c_im4  = f4(0,0,0,0);
+      var z_re4  = f4(0,0,0,0), z_im4  = f4(0,0,0,0);
+      var count4 = i4(0,0,0,0);
+      var z_re24 = f4(0,0,0,0), z_im24 = f4(0,0,0,0);
+      var new_re4 = f4(0,0,0,0), new_im4 = f4(0,0,0,0);
+      var i = 0;
+      var mi4 = i4(0,0,0,0);
+
+      c_re4 = f4(xf, xf, xf, xf);
+      c_im4 = f4(yf, toF(yd + yf), toF(yd + toF(yd + yf)), toF(yd + toF(yd + toF(yd + yf))));
+
+      z_re4  = c_re4;
+      z_im4  = c_im4;
+
+      for (i = 0; (i | 0) < (max_iterations | 0); i = (i + 1) | 0) {
+        z_re24 = f4mul(z_re4, z_re4);
+        z_im24 = f4mul(z_im4, z_im4);
+
+        mi4 = f4lessThanOrEqual(f4add(z_re24, z_im24), four4);
+        // If all 4 values are greater than 4.0, there's no reason to continue.
+        if ((mi4.signMask | 0) == 0x00)
+          break;
+
+        new_re4 = f4sub(z_re24, z_im24);
+        new_im4 = f4mul(f4mul(two4, z_re4), z_im4);
+        z_re4   = f4add(c_re4, new_re4);
+        z_im4   = f4add(c_im4, new_im4);
+        count4  = i4add(count4, i4and(mi4, one4));
+        m4 = i4(count4);
+      }
       mapColorAndSetPixel(x | 0, y | 0,   width, m4.x, max_iterations);
       mapColorAndSetPixel(x | 0, (y + 1) | 0, width, m4.y, max_iterations);
       mapColorAndSetPixel(x | 0, (y + 2) | 0, width, m4.z, max_iterations);
